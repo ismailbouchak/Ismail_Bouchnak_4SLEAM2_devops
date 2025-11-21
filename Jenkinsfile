@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        jdk 'java_17'
-        maven 'maven'
+        jdk 'JAVA_HOME'
+        maven 'H2_HOME'
     }
 
     environment {
