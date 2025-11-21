@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     tools {
-        jdk 'java_17'          
-        maven 'maven'        
+        jdk 'java_17'
+        maven 'maven'
     }
 
     environment {
-        GIT_CREDENTIALS = 'github_token'  
+        GIT_CREDENTIALS = 'Sudo_Git'
     }
 
     stages {
@@ -23,13 +23,9 @@ pipeline {
         stage('Build: clean & package') {
             steps {
                 sh 'mvn clean package -DskipTests'
-            }
-        }
-
-        
-
                 echo 'Build finished! JAR is available in target/.'
             }
         }
-    
+
+    }
 }
