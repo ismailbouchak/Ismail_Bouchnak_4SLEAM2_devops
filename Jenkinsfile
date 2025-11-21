@@ -16,7 +16,7 @@ pipeline {
             steps {
                 git branch: 'main',
                     credentialsId: "${GIT_CREDENTIALS}",
-                    url: 'https://github.com/oussama56159/touati_oussama4Sleam2.git'
+                    url: 'https://github.com/ismailbouchak/Ismail_Bouchnak_4SLEAM2_devops.git'
             }
         }
 
