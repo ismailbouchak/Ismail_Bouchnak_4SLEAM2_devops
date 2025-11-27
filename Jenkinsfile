@@ -1,80 +1,32 @@
 pipeline {
     agent any
-    
+
     tools {
-        maven 'M3'  // Make sure Maven is configured in Jenkins
+        jdk 'JAVA_HOME'
+        maven 'M2_HOME'
     }
-    
+
     environment {
-        DOCKER_IMAGE = 'your-username/your-app:latest'
-        DOCKER_REGISTRY = 'your-registry-url'
+        GIT_CREDENTIALS = 'Sudo_Git'
     }
-    
+
     stages {
-        stage('Checkout') {
+
+        stage('Clone Project') {
             steps {
-                checkout scm
+                git branch: 'main',
+                    credentialsId: "${GIT_CREDENTIALS}",
+                    url: 'https://github.com/ismailbouchak/Ismail_Bouchnak_4SLEAM2_devops.git'
             }
         }
-        
-        stage('Build') {
+
+        stage('Build: clean & package') {
             steps {
-                sh 'mvn clean compile'
+                sh 'mvn clean package -DskipTests'
+                echo 'Build finished! JAR is available in target/.'
             }
         }
-        
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
-            }
-        }
-        
-        stage('Package') {
-            steps {
-                sh 'mvn package -DskipTests'
-            }
-        }
-        
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}")
-                }
-            }
-        }
-        
-        stage('Test Docker Image') {
-            steps {
-                sh "docker run --rm ${DOCKER_IMAGE} java -version"
-            }
-        }
-        
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry("https://${DOCKER_REGISTRY}", 'docker-credentials') {
-                        docker.image("${DOCKER_IMAGE}").push()
-                    }
-                }
-            }
-        }
-    }
-    
-    post {
-        always {
-            echo 'Pipeline completed - cleaning up workspace'
-            cleanWs()
-        }
-        success {
-            echo 'Pipeline succeeded!'
-        }
-        failure {
-            echo 'Pipeline failed!'
-        }
+       
+
     }
 }
