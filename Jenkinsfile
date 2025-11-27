@@ -1,47 +1,80 @@
 pipeline {
     agent any
-
+    
     tools {
-        jdk 'JAVA_HOME'
-        maven 'M2_HOME'
+        maven 'M3'  // Make sure Maven is configured in Jenkins
     }
-
+    
     environment {
-        GIT_CREDENTIALS = 'Sudo_Git'
-        DOCKER_CREDENTIALS= credentials('63f7ba37-5357-4448-98a3-6490f139b7a1')
+        DOCKER_IMAGE = 'your-username/your-app:latest'
+        DOCKER_REGISTRY = 'your-registry-url'
     }
-
+    
     stages {
-
-        stage('Clone Project') {
+        stage('Checkout') {
             steps {
-                git branch: 'main',
-                    credentialsId: "${GIT_CREDENTIALS}",
-                    url: 'https://github.com/ismailbouchak/Ismail_Bouchnak_4SLEAM2_devops.git'
+                checkout scm
             }
         }
-
-        stage('Build: clean & package') {
+        
+        stage('Build') {
             steps {
-                sh 'mvn clean package -DskipTests'
-                echo 'Build finished! JAR is available in target/.'
+                sh 'mvn clean compile'
             }
         }
-        stage('Docker Build') {
+        
+        stage('Test') {
             steps {
-                script {
-                    sh "docker build -t DockerAccountUsername/student-management:1.0 ."
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
                 }
             }
         }
-
-        stage('Docker Push') {
+        
+        stage('Package') {
+            steps {
+                sh 'mvn package -DskipTests'
+            }
+        }
+        
+        stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'echo $DOCKER_CREDENTIALS_PSW | docker login -u $DOCKER_CREDENTIALS_USR --password-stdin'
-                    sh "docker push DockerAccountUsername/student-management:1.0"
+                    docker.build("${DOCKER_IMAGE}")
                 }
-            }}
-
+            }
+        }
+        
+        stage('Test Docker Image') {
+            steps {
+                sh "docker run --rm ${DOCKER_IMAGE} java -version"
+            }
+        }
+        
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry("https://${DOCKER_REGISTRY}", 'docker-credentials') {
+                        docker.image("${DOCKER_IMAGE}").push()
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Pipeline completed - cleaning up workspace'
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
     }
 }
