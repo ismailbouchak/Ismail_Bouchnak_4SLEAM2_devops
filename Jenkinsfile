@@ -1,4 +1,4 @@
-pipeline {
+Jenkinsfilepipeline {
     agent any
 
     tools {
