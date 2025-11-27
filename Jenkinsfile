@@ -1,4 +1,4 @@
-Jenkinsfilepipeline {
+pipeline { // **FIXED SYNTAX HERE**
     agent any
 
     tools {
@@ -7,8 +7,10 @@ Jenkinsfilepipeline {
     }
 
     environment {
+        // You should use withCredentials instead of exposing a PAT in an environment variable that way.
+        // Also, the Docker Password variable name must be consistent.
         GIT_CREDENTIALS = 'Sudo_Git'
-        DOCKER_CREDENTIALS_USR = credentials('dckr_pat_fiDaJC49D9G24le29XAVe8123T8')
+        // DOCKER_CREDENTIALS_USR = credentials('dckr_pat_fiDaJC49D9G24le29XAVe8123T8') // Removed for correct usage below
     }
 
     stages {
@@ -27,21 +29,27 @@ Jenkinsfilepipeline {
                 echo 'Build finished! JAR is available in target/.'
             }
         }
-        stage('Docker Push') {
-        steps {
-            script {
-                sh "echo ${DOCKER_CREDENTIALS_USR_PSW} | docker login -u ismail4000 --password-stdin"
-                sh "docker push ismail4000/student-management:1.0"
+        
+        stage('Docker Build') { // **STAGE ORDER CORRECTED**
+            steps {
+                script {
+                    sh "docker build -t ismail4000/student-management:1.0 ."
+                }
             }
         }
-    }
-    stage('Docker Build') {
-        steps {
-            script {
-                sh "docker build -t ismail4000/student-management:1.0 ."
+        
+        stage('Docker Push') { // **STAGE ORDER CORRECTED**
+            steps {
+                // Using 'withCredentials' is the standard secure way to handle Docker login
+                withCredentials([usernamePassword(
+                    credentialsId: 'dckr_pat_fiDaJC49D9G24le29XAVe8123T8', // Your Docker Credential ID
+                    passwordVariable: 'DOCKER_PASSWORD',
+                    usernameVariable: 'DOCKER_USERNAME')]) {
+                    
+                    sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
+                    sh "docker push ismail4000/student-management:1.0"
+                }
             }
         }
-    }
-
     }
 }
