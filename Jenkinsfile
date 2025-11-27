@@ -1,8 +1,6 @@
 pipeline {
     agent any
-environment {
-        DOCKER_CREDENTIALS= credentials('63f7ba37-5357-4448-98a3-6490f139b7a1')
-    }
+
     tools {
         jdk 'JAVA_HOME'
         maven 'M2_HOME'
@@ -10,6 +8,7 @@ environment {
 
     environment {
         GIT_CREDENTIALS = 'Sudo_Git'
+        DOCKER_CREDENTIALS= credentials('63f7ba37-5357-4448-98a3-6490f139b7a1')
     }
 
     stages {
