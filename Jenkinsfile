@@ -8,7 +8,8 @@ pipeline {
 
     environment {
         GIT_CREDENTIALS = 'Sudo_Git'
-        DOCKER_CREDENTIALS_USR = credentials('63f7ba37-5357-4448-98a3-6490f139b7a1')
+       DOCKER_IMAGE = 'ismail4000/student-management'
+        DOCKER_TAG = '1.0'
     }
 
     stages {
