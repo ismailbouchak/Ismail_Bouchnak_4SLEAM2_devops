@@ -1,4 +1,4 @@
-Jenkinsfilepipeline {
+pipeline {
     agent any
 
     tools {
@@ -13,7 +13,6 @@ Jenkinsfilepipeline {
     }
 
     stages {
-
         stage('Clone Project') {
             steps {
                 git branch: 'main',
@@ -28,21 +27,28 @@ Jenkinsfilepipeline {
                 echo 'Build finished! JAR is available in target/.'
             }
         }
-        stage('Docker Push') {
-        steps {
-            script {
-                sh "echo ${DOCKER_CREDENTIALS_USR_PSW} | docker login -u ismail4000 --password-stdin"
-                sh "docker push ismail4000/student-management:1.0"
-            }
-        }
-    }
-    stage('Docker Build') {
-        steps {
-            script {
-                sh "docker build -t ismail4000/student-management:1.0 ."
-            }
-        }
-    }
 
+        stage('Docker Build') {
+            steps {
+                script {
+                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                }
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'docker-hub-token',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
+                        sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    }
+                }
+            }
+        }
     }
 }
