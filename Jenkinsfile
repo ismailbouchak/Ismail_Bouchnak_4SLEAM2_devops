@@ -42,7 +42,7 @@ pipeline { // **FIXED SYNTAX HERE**
             steps {
                 // Using 'withCredentials' is the standard secure way to handle Docker login
                 withCredentials([usernamePassword(
-                    credentialsId: 'dckr_pat_fiDaJC49D9G24le29XAVe8123T8', // Your Docker Credential ID
+                    credentialsId: 'docker-hub-token', // Your Docker Credential ID
                     passwordVariable: 'DOCKER_PASSWORD',
                     usernameVariable: 'DOCKER_USERNAME')]) {
                     
